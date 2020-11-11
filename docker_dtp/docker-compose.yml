@@ -1,0 +1,46 @@
+version: '3.4'
+
+services:
+
+  php_dtp:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+      args:
+        TIMEZONE: ${TIMEZONE}
+    volumes:
+      - ./../:/app
+    depends_on:
+      - nginx_dtp
+    networks:
+      - dtp-network
+
+  nginx_dtp:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./../:/app
+    expose:
+      - 9000
+    networks:
+      - dtp-network
+
+  mysql_dtp:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - 3308:3306
+    networks:
+      - dtp-network
+networks:
+  dtp-network:
+    driver: bridge
